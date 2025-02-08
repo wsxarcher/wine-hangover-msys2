@@ -1939,6 +1939,13 @@ struct fd *open_fd( struct fd *root, const char *name, struct unicode_str nt_nam
                 fd->unix_fd = open( name, O_RDONLY | (flags & ~(O_TRUNC | O_CREAT | O_EXCL)), *mode );
         }
 
+        /* if we tried to open a read-only file */
+        if (errno == EACCES)
+        {
+            if (access & FILE_READ_ATTRIBUTES && !(options & FILE_DIRECTORY_FILE))
+                fd->unix_fd = open( name, O_RDONLY | (flags & ~(O_CREAT | O_TRUNC | O_CREAT | O_EXCL)), *mode );
+        }
+
         if (fd->unix_fd == -1)
         {
             /* check for trailing slash on file path */
